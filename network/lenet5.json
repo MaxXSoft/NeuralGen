@@ -1,0 +1,104 @@
+{
+  "apiVersion": "0.0.1",
+  "name": "LeNet5",
+  "layers": [
+    {
+      "type": "input",
+      "width": 32,
+      "height": 32,
+      "depth": 1
+    },
+    {
+      "type": "convolution",
+      "kernel": {
+        "width": 5,
+        "height": 5
+      },
+      "output": {
+        "width": 28,
+        "height": 28,
+        "depth": 6
+      }
+    },
+    {
+      "type": "activation",
+      "function": "tanh"
+    },
+    {
+      "type": "pooling",
+      "kernel": {
+        "width": 2,
+        "height": 2
+      },
+      "output": {
+        "width": 14,
+        "height": 14,
+        "depth": 6
+      }
+    },
+    {
+      "type": "activation",
+      "function": "tanh"
+    },
+    {
+      "type": "convolution",
+      "kernel": {
+        "width": 5,
+        "height": 5
+      },
+      "output": {
+        "width": 10,
+        "height": 10,
+        "depth": 16
+      }
+    },
+    {
+      "type": "activation",
+      "function": "tanh"
+    },
+    {
+      "type": "pooling",
+      "kernel": {
+        "width": 2,
+        "height": 2
+      },
+      "output": {
+        "width": 5,
+        "height": 5,
+        "depth": 16
+      }
+    },
+    {
+      "type": "activation",
+      "function": "tanh"
+    },
+    {
+      "type": "convolution",
+      "kernel": {
+        "width": 5,
+        "height": 5
+      },
+      "output": {
+        "width": 1,
+        "height": 1,
+        "depth": 120
+      }
+    },
+    {
+      "type": "activation",
+      "function": "tanh"
+    },
+    {
+      "type": "full_connection",
+      "output": {
+        "width": 1,
+        "height": 1,
+        "depth": 10
+      }
+    },
+    {
+      "type": "activation",
+      "function": "tanh"
+    }
+  ]
+}
