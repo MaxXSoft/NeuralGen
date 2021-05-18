@@ -65,6 +65,7 @@ class Convolution(Layer):
   def from_dict(self, d: Dict[str, Any]) -> Type['Layer']:
     self.__kernel: Dict[str, int] = d['kernel']
     self.__output: Dict[str, int] = d['output']
+    self.__activation: str = d['activation']
     return self
 
   def to_dict(self) -> Dict[str, Any]:
@@ -72,6 +73,7 @@ class Convolution(Layer):
         'type': Convolution.layer_type(),
         'kernel': self.__kernel,
         'output': self.__output,
+        'activation': self.__activation,
     }
 
 
@@ -87,6 +89,7 @@ class Pooling(Layer):
   def from_dict(self, d: Dict[str, Any]) -> Type['Layer']:
     self.__kernel: Dict[str, int] = d['kernel']
     self.__output: Dict[str, int] = d['output']
+    self.__activation: str = d['activation']
     return self
 
   def to_dict(self) -> Dict[str, Any]:
@@ -94,6 +97,7 @@ class Pooling(Layer):
         'type': Pooling.layer_type(),
         'kernel': self.__kernel,
         'output': self.__output,
+        'activation': self.__activation,
     }
 
 
@@ -108,32 +112,14 @@ class FullConnection(Layer):
 
   def from_dict(self, d: Dict[str, Any]) -> Type['Layer']:
     self.__output: Dict[str, int] = d['output']
+    self.__activation: str = d['activation']
     return self
 
   def to_dict(self) -> Dict[str, Any]:
     return {
         'type': FullConnection.layer_type(),
         'output': self.__output,
-    }
-
-
-class Activation(Layer):
-  '''
-  Activation layer.
-  '''
-
-  @staticmethod
-  def layer_type() -> str:
-    return 'activation'
-
-  def from_dict(self, d: Dict[str, Any]) -> Type['Layer']:
-    self.__function: str = d['function']
-    return self
-
-  def to_dict(self) -> Dict[str, Any]:
-    return {
-        'type': Activation.layer_type(),
-        'function': self.__function,
+        'activation': self.__activation,
     }
 
 
@@ -142,5 +128,5 @@ def from_dict(d: Dict[str, Any]) -> Type['Layer']:
   Read layer from a dictionary.
   '''
   layers = {l.layer_type(): l for l in [
-      Input, Convolution, Pooling, FullConnection, Activation]}
+      Input, Convolution, Pooling, FullConnection]}
   return layers[d['type']]().from_dict(d)
