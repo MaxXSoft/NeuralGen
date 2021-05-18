@@ -18,11 +18,8 @@
         "width": 28,
         "height": 28,
         "depth": 6
-      }
-    },
-    {
-      "type": "activation",
-      "function": "tanh"
+      },
+      "activation": "tanh"
     },
     {
       "type": "pooling",
@@ -34,11 +31,8 @@
         "width": 14,
         "height": 14,
         "depth": 6
-      }
-    },
-    {
-      "type": "activation",
-      "function": "tanh"
+      },
+      "activation": "tanh"
     },
     {
       "type": "convolution",
@@ -50,11 +44,8 @@
         "width": 10,
         "height": 10,
         "depth": 16
-      }
-    },
-    {
-      "type": "activation",
-      "function": "tanh"
+      },
+      "activation": "tanh"
     },
     {
       "type": "pooling",
@@ -66,11 +57,8 @@
         "width": 5,
         "height": 5,
         "depth": 16
-      }
-    },
-    {
-      "type": "activation",
-      "function": "tanh"
+      },
+      "activation": "tanh"
     },
     {
       "type": "convolution",
@@ -82,11 +70,8 @@
         "width": 1,
         "height": 1,
         "depth": 120
-      }
-    },
-    {
-      "type": "activation",
-      "function": "tanh"
+      },
+      "activation": "tanh"
     },
     {
       "type": "full_connection",
@@ -94,11 +79,8 @@
         "width": 1,
         "height": 1,
         "depth": 10
-      }
-    },
-    {
-      "type": "activation",
-      "function": "tanh"
+      },
+      "activation": "tanh"
     }
   ]
 }
