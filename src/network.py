@@ -1,11 +1,16 @@
-import json
 from typing import List, Type, Dict, Any
 from layer import Layer, from_dict as layer_from_dict
 
 
+'''
+API version
+'''
+__API_VERSION = '0.0.1'
+
+
 class Network:
   '''
-  A neural network.
+  Represents a neural network.
   '''
 
   def __init__(self, name: str) -> None:
@@ -17,6 +22,16 @@ class Network:
     Add a new layer to the current network.
     '''
     self.__layers.append(layer)
+
+  def to_dict(self) -> Dict[str, Any]:
+    '''
+    Convert the current network to a dictionary.
+    '''
+    return {
+        'apiVersion': __API_VERSION,
+        'name': self.__name,
+        'layers': [l.to_dict() for l in self.__layers]
+    }
 
   @property
   def name(self) -> str:
