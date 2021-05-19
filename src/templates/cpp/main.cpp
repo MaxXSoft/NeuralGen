@@ -1,5 +1,7 @@
 #ifndef GENERATED
 #include "define.h"
+#define NETWORK_LAYERS(e) e(CONV_3D, 0, 100) e(FULL_CONN, 1, 10)
+#define OUTPUT_SIZE 10
 #endif  // GENERATED
 
 namespace {
@@ -36,7 +38,7 @@ struct ModelLayerHeader {
 
 // open file or fail
 void OpenFile(std::ifstream &ifs, std::string_view file) {
-  ifs.open(file, std::ios::binary);
+  ifs.open(std::string(file), std::ios::binary);
   if (!ifs) {
     throw std::runtime_error("Failed to open file!");
   }
@@ -81,18 +83,31 @@ FloatArr ReadInput(std::istream &is) {
 }
 
 // infer
-FloatArr Infer(const ModelData &model, const FloatArr &input) {
-  // TODO
+FloatArr Infer(const ModelData &model, FloatArr input) {
+  NETWORK_LAYERS(NETWORK_EXPANDER);
+  return input;
 }
 
 // dump output to stderr
 void DumpOutput(const FloatArr &output) {
-  // TODO
+  for (size_t i = 0; i < OUTPUT_SIZE; ++i) {
+    if (i) std::cerr << ' ';
+    std::cerr << output[i];
+  }
+  std::cerr << std::endl;
 }
 
 // get the index of the maximum output
 size_t GetMaxIndex(const FloatArr &output) {
-  // TODO
+  float max_elem = -1e9;
+  size_t max_i = 0;
+  for (size_t i = 0; i < OUTPUT_SIZE; ++i) {
+    if (output[i] > max_elem) {
+      max_elem = output[i];
+      max_i = i;
+    }
+  }
+  return max_i;
 }
 
 }  // namespace
@@ -116,7 +131,7 @@ int main(int argc, const char *argv[]) {
   auto input = ReadInput(ifs);
 
   // infer
-  auto output = Infer(model, input);
+  auto output = Infer(model, std::move(input));
   DumpOutput(output);
   std::cout << GetMaxIndex(output) << std::endl;
   return 0;
