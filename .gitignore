@@ -6,3 +6,6 @@ debug
 
 # python
 __pycache__
+
+# VS Code
+.vscode
