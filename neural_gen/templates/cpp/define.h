@@ -27,12 +27,14 @@
 #define DECL_LAYER(type, id) \
   void type(id)(float *in, float *out, float *weight, float *bias)
 
-#define NETWORK_EXPANDER(type, id, out_size)                 \
-  DECL_LAYER(type, id);                                      \
-  auto output = std::make_unique<float[]>(out_size);         \
-  type(id)(input.get(), output.get(), model[id].first.get(), \
-           model[id].second.get());                          \
-  input = std::move(output);
+#define NETWORK_EXPANDER(type, id, out_size)                   \
+  do {                                                         \
+    DECL_LAYER(type, id);                                      \
+    auto output = std::make_unique<float[]>(out_size);         \
+    type(id)(input.get(), output.get(), model[id].first.get(), \
+             model[id].second.get());                          \
+    input = std::move(output);                                 \
+  } while (0);
 
 inline size_t GetIndex(size_t x, size_t y, size_t channel, size_t width,
                        size_t height, size_t depth) {
