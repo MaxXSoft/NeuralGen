@@ -22,7 +22,7 @@
 
 namespace {
 
-DECL_LAYER(FULL_CONN, LAYER_ID) {
+DECL_LAYER(POOLING, LAYER_ID) {
   for (size_t i = 0; i < OUTPUT_DEPTH; i++) {
     size_t block = INPUT_WIDTH * INPUT_HEIGHT * i;
     for (size_t y = 0; y < OUTPUT_HEIGHT; y++) {

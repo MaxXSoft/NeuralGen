@@ -12,7 +12,7 @@
 
 namespace {
 
-DECL_LAYER(POOLING, LAYER_ID) {
+DECL_LAYER(FULL_CONN, LAYER_ID) {
   for (size_t i = 0; i < OUTPUT_SIZE; i++) {
     out[i] = 0.0;
     for (size_t c = 0; c < INPUT_SIZE; c++) {
