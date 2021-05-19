@@ -63,6 +63,8 @@ class Convolution(Layer):
     return 'convolution'
 
   def from_dict(self, d: Dict[str, Any]) -> Type['Layer']:
+    self.__padding: str = d['padding']
+    self.__stride: int = d['stride']
     self.__kernel: Dict[str, int] = d['kernel']
     self.__output: Dict[str, int] = d['output']
     self.__activation: str = d['activation']
@@ -71,6 +73,8 @@ class Convolution(Layer):
   def to_dict(self) -> Dict[str, Any]:
     return {
         'type': Convolution.layer_type(),
+        'padding': self.__padding,
+        'stride': self.__stride,
         'kernel': self.__kernel,
         'output': self.__output,
         'activation': self.__activation,
@@ -87,6 +91,9 @@ class Pooling(Layer):
     return 'pooling'
 
   def from_dict(self, d: Dict[str, Any]) -> Type['Layer']:
+    self.__function: str = d['function']
+    self.__padding: str = d['padding']
+    self.__stride: int = d['stride']
     self.__kernel: Dict[str, int] = d['kernel']
     self.__output: Dict[str, int] = d['output']
     self.__activation: str = d['activation']
@@ -95,6 +102,9 @@ class Pooling(Layer):
   def to_dict(self) -> Dict[str, Any]:
     return {
         'type': Pooling.layer_type(),
+        'function': self.__function,
+        'padding': self.__padding,
+        'stride': self.__stride,
         'kernel': self.__kernel,
         'output': self.__output,
         'activation': self.__activation,
