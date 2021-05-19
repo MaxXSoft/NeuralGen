@@ -11,6 +11,7 @@
 #define ACT_FUNC(id) CONCAT(ActFunc_, id)
 #define CONV_3D(id) CONCAT(Conv3D_, id)
 #define POOLING(id) CONCAT(Pooling_, id)
+#define FULL_CONN(id) CONCAT(FullConn_, id)
 
 inline size_t GetIndex(size_t x, size_t y, size_t channel, size_t width,
                        size_t height, size_t depth) {
