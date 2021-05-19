@@ -38,6 +38,8 @@ struct ModelLayerHeader {
 
 // open file or fail
 void OpenFile(std::ifstream &ifs, std::string_view file) {
+  ifs.close();
+  ifs.clear();
   ifs.open(std::string(file), std::ios::binary);
   if (!ifs) {
     throw std::runtime_error("Failed to open file!");
@@ -75,7 +77,7 @@ FloatArr ReadInput(std::istream &is) {
     is.read(reinterpret_cast<char *>(&cur), 1);
     arr.push_back(static_cast<float>(cur));
   }
-  if (!is) throw std::runtime_error("File error!");
+  if (is.fail() && !is.eof()) throw std::runtime_error("File error!");
   // copy to float array
   auto input = std::make_unique<float[]>(arr.size());
   std::memcpy(input.get(), arr.data(), arr.size());
