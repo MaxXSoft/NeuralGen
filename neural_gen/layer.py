@@ -90,7 +90,7 @@ class Convolution(Layer):
     }
 
   def get_output_size(self) -> int:
-    return self.__output['width'] * self.__kernel['height'] * self.__kernel['depth']
+    return self.__output['width'] * self.__output['height'] * self.__output['depth']
 
 
 class Pooling(Layer):
@@ -123,7 +123,7 @@ class Pooling(Layer):
     }
 
   def get_output_size(self) -> int:
-    return self.__output['width'] * self.__kernel['height'] * self.__kernel['depth']
+    return self.__output['width'] * self.__output['height'] * self.__output['depth']
 
 
 class FullConnection(Layer):

@@ -1,5 +1,5 @@
 from typing import List, Type, Dict, Any
-from layer import Layer, from_dict as layer_from_dict
+from neural_gen.layer import Layer, from_dict as layer_from_dict
 
 
 '''
