@@ -1,7 +1,13 @@
-from typing import Type, Optional, TextIO
-from layer import Layer, Input, Convolution, Pooling, FullConnection
+from typing import Optional, Tuple, TextIO
+from layer import Input, Convolution, Pooling, FullConnection
 from network import Network
 from os import path
+
+
+'''
+Type of (width, height, depth) tuple.
+'''
+__WhdTuple = Optional[Tuple[int, int, int]]
 
 
 class Generator:
@@ -42,7 +48,7 @@ class CppGenerator(Generator):
   '''
 
   '''
-  Type of all layers.
+  Type (in generated C++ code) of all layers.
   '''
   __LAYER_TYPE = {
       'convolution': 'CONV_3D',
@@ -60,44 +66,72 @@ class CppGenerator(Generator):
     self.__pooling = Generator._read_template('cpp', 'pooling.cpp')
     self.__fullconn = Generator._read_template('cpp', 'fullconn.cpp')
 
-  def __gen_input(self, layer_id: int, last_layer: Optional[Type[Layer]], layer: Input) -> None:
+  def __gen_input(self, layer_id: int, layer: Input, last_whd: __WhdTuple) -> __WhdTuple:
     '''
     Generate input layer.
     '''
     # do nothing
-    pass
+    return None
 
-  def __gen_conv(self, layer_id: int, last_layer: Optional[Type[Layer]], layer: Convolution) -> None:
+  def __gen_conv(self, layer_id: int, layer: Convolution, last_whd: __WhdTuple) -> __WhdTuple:
     '''
     Generate convolution layer.
     '''
+    last_width, last_height, last_depth = last_whd
+    width = layer["output"]["width"]
+    height = layer["output"]["height"]
+    depth = layer["output"]["depth"]
     self.__code += f'#define LAYER_ID {layer_id}\n'
     self.__code += f'#define PADDING_{layer["padding"].upper()}\n'
     self.__code += f'#define STRIDE {layer["stride"]}\n'
     self.__code += f'#define KERNEL_WIDTH {layer["kernel"]["width"]}\n'
     self.__code += f'#define KERNEL_HEIGHT {layer["kernel"]["height"]}\n'
-    # TODO
-    self.__code += f'#define INPUT_WIDTH ???\n'
-    self.__code += f'#define INPUT_HEIGHT ???\n'
-    self.__code += f'#define INPUT_DEPTH ???\n'
-    self.__code += f'#define OUTPUT_WIDTH {layer["kernel"]["width"]}\n'
-    self.__code += f'#define OUTPUT_HEIGHT {layer["kernel"]["height"]}\n'
-    self.__code += f'#define OUTPUT_DEPTH {layer["kernel"]["depth"]}\n'
-    self.__code += f'#define ACTIVATION {layer["activation"]}\n'
+    self.__code += f'#define INPUT_WIDTH {last_width}\n'
+    self.__code += f'#define INPUT_HEIGHT {last_height}\n'
+    self.__code += f'#define INPUT_DEPTH {last_depth}\n'
+    self.__code += f'#define OUTPUT_WIDTH {width}\n'
+    self.__code += f'#define OUTPUT_HEIGHT {height}\n'
+    self.__code += f'#define OUTPUT_DEPTH {depth}\n'
+    self.__code += f'#define ACTIVATION {layer["activation"]}\n\n'
+    self.__code += self.__convolution
+    return (width, height, depth)
 
-  def __gen_pooling(self, layer_id: int, last_layer: Optional[Type[Layer]], layer: Pooling) -> None:
+  def __gen_pooling(self, layer_id: int, layer: Pooling, last_whd: __WhdTuple) -> __WhdTuple:
     '''
     Generate pooling layer.
     '''
-    # TODO
-    pass
+    last_width, last_height, last_depth = last_whd
+    width = layer["output"]["width"]
+    height = layer["output"]["height"]
+    depth = layer["output"]["depth"]
+    self.__code += f'#define LAYER_ID {layer_id}\n'
+    self.__code += f'#define FUNCTION_{layer["function"].upper()}\n'
+    self.__code += f'#define PADDING_{layer["padding"].upper()}\n'
+    self.__code += f'#define STRIDE {layer["stride"]}\n'
+    self.__code += f'#define KERNEL_WIDTH {layer["kernel"]["width"]}\n'
+    self.__code += f'#define KERNEL_HEIGHT {layer["kernel"]["height"]}\n'
+    self.__code += f'#define INPUT_WIDTH {last_width}\n'
+    self.__code += f'#define INPUT_HEIGHT {last_height}\n'
+    self.__code += f'#define INPUT_DEPTH {last_depth}\n'
+    self.__code += f'#define OUTPUT_WIDTH {width}\n'
+    self.__code += f'#define OUTPUT_HEIGHT {height}\n'
+    self.__code += f'#define OUTPUT_DEPTH {depth}\n'
+    self.__code += f'#define ACTIVATION {layer["activation"]}\n\n'
+    self.__code += self.__pooling
+    return (width, height, depth)
 
-  def __gen_full_conn(self, layer_id: int, last_layer: Optional[Type[Layer]], layer: FullConnection) -> None:
+  def __gen_full_conn(self, layer_id: int, layer: FullConnection, last_whd: __WhdTuple) -> __WhdTuple:
     '''
     Generate fully connection layer.
     '''
-    # TODO
-    pass
+    _, _, last_size = last_whd
+    size = layer["output_size"]
+    self.__code += f'#define LAYER_ID {layer_id}\n'
+    self.__code += f'#define INPUT_SIZE {last_size}\n'
+    self.__code += f'#define OUTPUT_SIZE {size}\n'
+    self.__code += f'#define ACTIVATION {layer["activation"]}\n\n'
+    self.__code += self.__fullconn
+    return (1, 1, size)
 
   def generate(self, network: Network) -> None:
     self.__code = '#define GENERATED\n\n'
@@ -117,9 +151,9 @@ class CppGenerator(Generator):
         'pooling': self.__gen_pooling,
         'full_connection': self.__gen_full_conn,
     }
+    last_whd = None
     for i, layer in enumerate(network.layers):
-      layer_gen[layer.layer_type()](
-          i, network.layers[i - 1] if i else None, layer)
+      last_whd = layer_gen[layer.layer_type()](i, layer, last_whd)
 
   def dump(self, f: TextIO) -> None:
     f.write(self.__code)
