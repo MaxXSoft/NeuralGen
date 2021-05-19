@@ -132,20 +132,12 @@
     },
     {
       "type": "full_connection",
-      "output": {
-        "width": 1,
-        "height": 1,
-        "depth": 4096
-      },
+      "outputSize": 4096,
       "activation": "relu"
     },
     {
       "type": "full_connection",
-      "output": {
-        "width": 1,
-        "height": 1,
-        "depth": 1000
-      },
+      "outputSize": 1000,
       "activation": "softmax"
     }
   ]

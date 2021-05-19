@@ -87,11 +87,7 @@
     },
     {
       "type": "full_connection",
-      "output": {
-        "width": 1,
-        "height": 1,
-        "depth": 10
-      },
+      "outputSize": 10,
       "activation": "tanh"
     }
   ]
