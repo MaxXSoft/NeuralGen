@@ -13,8 +13,8 @@ namespace {
   LAYER_NUM:          4
   LAYERn_WEIGHT_SIZE: 4
   LAYERn_BIAS_SIZE:   4
-  LAYERn_WEIGHT_DATA: LAYERn_WEIGHT_SIZE
-  LAYERn_BIAS_DATA:   LAYERn_BIAS_SIZE
+  LAYERn_WEIGHT_DATA: LAYERn_WEIGHT_SIZE * sizeof(float)
+  LAYERn_BIAS_DATA:   LAYERn_BIAS_SIZE * sizeof(float)
 */
 
 // pointer to float array
