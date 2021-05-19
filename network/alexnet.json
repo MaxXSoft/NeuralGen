@@ -1,0 +1,152 @@
+{
+  "apiVersion": "0.0.1",
+  "name": "AlexNet",
+  "layers": [
+    {
+      "type": "input",
+      "width": 227,
+      "height": 227,
+      "depth": 3
+    },
+    {
+      "type": "convolution",
+      "padding": "valid",
+      "stride": 4,
+      "kernel": {
+        "width": 11,
+        "height": 11
+      },
+      "output": {
+        "width": 55,
+        "height": 55,
+        "depth": 96
+      },
+      "activation": "relu"
+    },
+    {
+      "type": "pooling",
+      "function": "max",
+      "padding": "valid",
+      "stride": 2,
+      "kernel": {
+        "width": 3,
+        "height": 3
+      },
+      "output": {
+        "width": 27,
+        "height": 27,
+        "depth": 96
+      },
+      "activation": "id"
+    },
+    {
+      "type": "convolution",
+      "padding": "same",
+      "stride": 1,
+      "kernel": {
+        "width": 5,
+        "height": 5
+      },
+      "output": {
+        "width": 27,
+        "height": 27,
+        "depth": 256
+      },
+      "activation": "relu"
+    },
+    {
+      "type": "pooling",
+      "function": "max",
+      "padding": "valid",
+      "stride": 2,
+      "kernel": {
+        "width": 3,
+        "height": 3
+      },
+      "output": {
+        "width": 13,
+        "height": 13,
+        "depth": 256
+      },
+      "activation": "id"
+    },
+    {
+      "type": "convolution",
+      "padding": "same",
+      "stride": 1,
+      "kernel": {
+        "width": 3,
+        "height": 3
+      },
+      "output": {
+        "width": 13,
+        "height": 13,
+        "depth": 384
+      },
+      "activation": "relu"
+    },
+    {
+      "type": "convolution",
+      "padding": "same",
+      "stride": 1,
+      "kernel": {
+        "width": 3,
+        "height": 3
+      },
+      "output": {
+        "width": 13,
+        "height": 13,
+        "depth": 384
+      },
+      "activation": "relu"
+    },
+    {
+      "type": "convolution",
+      "padding": "same",
+      "stride": 1,
+      "kernel": {
+        "width": 3,
+        "height": 3
+      },
+      "output": {
+        "width": 13,
+        "height": 13,
+        "depth": 256
+      },
+      "activation": "relu"
+    },
+    {
+      "type": "convolution",
+      "padding": "valid",
+      "stride": 1,
+      "kernel": {
+        "width": 13,
+        "height": 13
+      },
+      "output": {
+        "width": 1,
+        "height": 1,
+        "depth": 4096
+      },
+      "activation": "relu"
+    },
+    {
+      "type": "full_connection",
+      "output": {
+        "width": 1,
+        "height": 1,
+        "depth": 4096
+      },
+      "activation": "relu"
+    },
+    {
+      "type": "full_connection",
+      "output": {
+        "width": 1,
+        "height": 1,
+        "depth": 1000
+      },
+      "activation": "softmax"
+    }
+  ]
+}
