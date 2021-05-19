@@ -18,7 +18,8 @@
 #define ACTIVATION tanh
 #endif
 
-void CONV_3D(LAYER_ID)(float *in, float *out, float *weight, float *bias) {
+static void CONV_3D(LAYER_ID)(float *in, float *out, float *weight,
+                              float *bias) {
   for (size_t channel = 0; channel < OUTPUT_DEPTH; ++channel) {
     for (size_t y = 0; y < OUTPUT_HEIGHT; ++y) {
       for (size_t x = 0; x < OUTPUT_WIDTH; ++x) {
