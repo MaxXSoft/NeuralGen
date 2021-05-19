@@ -16,10 +16,11 @@
 #define OUTPUT_HEIGHT 28
 #define OUTPUT_DEPTH 6
 #define ACTIVATION tanh
-#endif
+#endif  // GENERATED
 
-static void CONV_3D(LAYER_ID)(float *in, float *out, float *weight,
-                              float *bias) {
+namespace {
+
+DECL_LAYER(CONV_3D, LAYER_ID) {
   for (size_t channel = 0; channel < OUTPUT_DEPTH; ++channel) {
     for (size_t y = 0; y < OUTPUT_HEIGHT; ++y) {
       for (size_t x = 0; x < OUTPUT_WIDTH; ++x) {
@@ -55,6 +56,8 @@ static void CONV_3D(LAYER_ID)(float *in, float *out, float *weight,
     }
   }
 }
+
+}  // namespace
 
 #undef LAYER_ID
 #undef PADDING_VALID

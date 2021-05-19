@@ -18,10 +18,11 @@
 #define OUTPUT_HEIGHT 14
 #define OUTPUT_DEPTH 6
 #define ACTIVATION tanh
-#endif
+#endif  // GENERATED
 
-static void POOLING(LAYER_ID)(float *in, float *out, float *weight,
-                              float *bias) {
+namespace {
+
+DECL_LAYER(FULL_CONN, LAYER_ID) {
   for (size_t i = 0; i < OUTPUT_DEPTH; i++) {
     size_t block = INPUT_WIDTH * INPUT_HEIGHT * i;
     for (size_t y = 0; y < OUTPUT_HEIGHT; y++) {
@@ -57,6 +58,8 @@ static void POOLING(LAYER_ID)(float *in, float *out, float *weight,
     }
   }
 }
+
+}  // namespace
 
 #undef LAYER_ID
 #undef FUNCTION_AVERAGE
