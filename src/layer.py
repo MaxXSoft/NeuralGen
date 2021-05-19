@@ -113,7 +113,7 @@ class Pooling(Layer):
 
 class FullConnection(Layer):
   '''
-  Full connection layer.
+  Fully connection layer.
   '''
 
   @staticmethod
@@ -121,14 +121,14 @@ class FullConnection(Layer):
     return 'full_connection'
 
   def from_dict(self, d: Dict[str, Any]) -> Type['Layer']:
-    self.__output: Dict[str, int] = d['output']
+    self.__output_size: int = d['outputSize']
     self.__activation: str = d['activation']
     return self
 
   def to_dict(self) -> Dict[str, Any]:
     return {
         'type': FullConnection.layer_type(),
-        'output': self.__output,
+        'output_size': self.__output_size,
         'activation': self.__activation,
     }
 
