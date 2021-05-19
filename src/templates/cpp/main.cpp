@@ -136,3 +136,6 @@ int main(int argc, const char *argv[]) {
   std::cout << GetMaxIndex(output) << std::endl;
   return 0;
 }
+
+#undef NETWORK_LAYERS
+#undef OUTPUT_SIZE
