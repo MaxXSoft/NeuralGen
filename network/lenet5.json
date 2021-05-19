@@ -10,6 +10,8 @@
     },
     {
       "type": "convolution",
+      "padding": "valid",
+      "stride": 1,
       "kernel": {
         "width": 5,
         "height": 5
@@ -23,6 +25,9 @@
     },
     {
       "type": "pooling",
+      "function": "average",
+      "padding": "valid",
+      "stride": 1,
       "kernel": {
         "width": 2,
         "height": 2
@@ -36,6 +41,8 @@
     },
     {
       "type": "convolution",
+      "padding": "valid",
+      "stride": 1,
       "kernel": {
         "width": 5,
         "height": 5
@@ -49,6 +56,9 @@
     },
     {
       "type": "pooling",
+      "function": "average",
+      "padding": "valid",
+      "stride": 1,
       "kernel": {
         "width": 2,
         "height": 2
@@ -62,6 +72,8 @@
     },
     {
       "type": "convolution",
+      "padding": "valid",
+      "stride": 1,
       "kernel": {
         "width": 5,
         "height": 5
