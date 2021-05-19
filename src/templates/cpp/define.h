@@ -11,6 +11,7 @@
 #include <iostream>     // main
 #include <memory>       // main
 #include <stdexcept>    // main
+#include <string>       // main
 #include <string_view>  // main
 #include <utility>      // main
 #include <vector>       // main
@@ -25,6 +26,13 @@
 
 #define DECL_LAYER(type, id) \
   void type(id)(float *in, float *out, float *weight, float *bias)
+
+#define NETWORK_EXPANDER(type, id, out_size)                 \
+  DECL_LAYER(type, id);                                      \
+  auto output = std::make_unique<float[]>(out_size);         \
+  type(id)(input.get(), output.get(), model[id].first.get(), \
+           model[id].second.get());                          \
+  input = std::move(output);
 
 inline size_t GetIndex(size_t x, size_t y, size_t channel, size_t width,
                        size_t height, size_t depth) {
