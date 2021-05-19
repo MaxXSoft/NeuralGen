@@ -25,6 +25,12 @@ class Layer:
     '''
     raise NotImplementedError
 
+  def get_output_size(self) -> int:
+    '''
+    Get output size.
+    '''
+    raise NotImplementedError
+
   def __getitem__(self, key: str) -> Any:
     return self.to_dict()[key]
 
@@ -51,6 +57,9 @@ class Input(Layer):
         'height': self.__height,
         'depth': self.__depth,
     }
+
+  def get_output_size(self) -> int:
+    return self.__width * self.__height * self.__depth
 
 
 class Convolution(Layer):
@@ -79,6 +88,9 @@ class Convolution(Layer):
         'output': self.__output,
         'activation': self.__activation,
     }
+
+  def get_output_size(self) -> int:
+    return self.__output['width'] * self.__kernel['height'] * self.__kernel['depth']
 
 
 class Pooling(Layer):
@@ -110,6 +122,9 @@ class Pooling(Layer):
         'activation': self.__activation,
     }
 
+  def get_output_size(self) -> int:
+    return self.__output['width'] * self.__kernel['height'] * self.__kernel['depth']
+
 
 class FullConnection(Layer):
   '''
@@ -131,6 +146,9 @@ class FullConnection(Layer):
         'output_size': self.__output_size,
         'activation': self.__activation,
     }
+
+  def get_output_size(self) -> int:
+    return self.__output_size
 
 
 def from_dict(d: Dict[str, Any]) -> Type['Layer']:
