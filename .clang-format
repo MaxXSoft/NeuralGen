@@ -8,3 +8,6 @@ BreakBeforeBraces: Custom
 BraceWrapping:
   BeforeCatch: true
   BeforeElse: true
+
+DerivePointerAlignment: false
+PointerAlignment: Right
