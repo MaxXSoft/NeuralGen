@@ -119,25 +119,25 @@ size_t GetMaxIndex(const FloatArr &output) {
 int main(int argc, const char *argv[]) {
   // check & parse command line arguments
   if (argc < 3) {
-    std::cerr << "Usage: " << argv[0] << " MODEL INPUT" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " MODEL <INPUT ...>" << std::endl;
     return 1;
   }
   std::string_view mod_file = argv[1];
-  std::string_view input_file = argv[2];
 
   // read model data
   std::ifstream ifs;
   OpenFile(ifs, mod_file);
   auto model = ReadModel(ifs);
 
-  // read input
-  OpenFile(ifs, input_file);
-  auto input = ReadInput(ifs);
-
-  // infer
-  auto output = Infer(model, std::move(input));
-  DumpOutput(output);
-  std::cout << GetMaxIndex(output) << std::endl;
+  // read inputs
+  for (size_t i = 2; i < argc; ++i) {
+    OpenFile(ifs, argv[i]);
+    auto input = ReadInput(ifs);
+    // infer
+    auto output = Infer(model, std::move(input));
+    DumpOutput(output);
+    std::cout << GetMaxIndex(output) << std::endl;
+  }
   return 0;
 }
 
