@@ -1,8 +1,5 @@
 // for debugging
 #ifndef GENERATED
-#include <algorithm>
-#include <cstddef>
-
 #include "define.h"
 
 #define LAYER_ID 0
@@ -20,13 +17,14 @@
 #define ACTIVATION tanh
 #endif  // GENERATED
 
-namespace {
-
 DECL_LAYER(POOLING, LAYER_ID) {
+#ifdef _OPENMP
+#pragma omp parallel for collapse(3)
+#endif  // _OPENMP
   for (size_t i = 0; i < OUTPUT_DEPTH; i++) {
-    size_t block = INPUT_WIDTH * INPUT_HEIGHT * i;
     for (size_t y = 0; y < OUTPUT_HEIGHT; y++) {
       for (size_t x = 0; x < OUTPUT_WIDTH; x++) {
+        size_t block = INPUT_WIDTH * INPUT_HEIGHT * i;
         size_t rows = y * KERNEL_WIDTH;
         size_t cols = x * KERNEL_HEIGHT;
         size_t index =
@@ -58,8 +56,6 @@ DECL_LAYER(POOLING, LAYER_ID) {
     }
   }
 }
-
-}  // namespace
 
 #undef LAYER_ID
 #undef FUNCTION_AVERAGE

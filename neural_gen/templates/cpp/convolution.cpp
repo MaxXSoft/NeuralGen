@@ -1,7 +1,5 @@
 // for debugging
 #ifndef GENERATED
-#include <cstddef>
-
 #include "define.h"
 
 #define LAYER_ID 0
@@ -18,9 +16,10 @@
 #define ACTIVATION tanh
 #endif  // GENERATED
 
-namespace {
-
 DECL_LAYER(CONV_3D, LAYER_ID) {
+#ifdef _OPENMP
+#pragma omp parallel for collapse(3)
+#endif  // _OPENMP
   for (size_t channel = 0; channel < OUTPUT_DEPTH; ++channel) {
     for (size_t y = 0; y < OUTPUT_HEIGHT; ++y) {
       for (size_t x = 0; x < OUTPUT_WIDTH; ++x) {
@@ -56,8 +55,6 @@ DECL_LAYER(CONV_3D, LAYER_ID) {
     }
   }
 }
-
-}  // namespace
 
 #undef LAYER_ID
 #undef PADDING_VALID

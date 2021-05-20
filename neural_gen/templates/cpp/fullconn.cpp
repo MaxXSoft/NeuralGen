@@ -1,7 +1,5 @@
 // for debugging
 #ifndef GENERATED
-#include <cstddef>
-
 #include "define.h"
 
 #define LAYER_ID 0
@@ -10,9 +8,10 @@
 #define ACTIVATION tanh
 #endif  // GENERATED
 
-namespace {
-
 DECL_LAYER(FULL_CONN, LAYER_ID) {
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif  // _OPENMP
   for (size_t i = 0; i < OUTPUT_SIZE; i++) {
     out[i] = 0.0;
     for (size_t c = 0; c < INPUT_SIZE; c++) {
@@ -22,8 +21,6 @@ DECL_LAYER(FULL_CONN, LAYER_ID) {
     out[i] = ACT_FUNC(ACTIVATION)(out[i]);
   }
 }
-
-}  // namespace
 
 #undef LAYER_ID
 #undef INPUT_SIZE
