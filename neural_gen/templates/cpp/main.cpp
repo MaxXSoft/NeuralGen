@@ -61,8 +61,10 @@ ModelData ReadModel(std::istream &is) {
     is.read(reinterpret_cast<char *>(&mlh), sizeof(ModelLayerHeader));
     auto weight = std::make_unique<float[]>(mlh.weight_size);
     auto bias = std::make_unique<float[]>(mlh.bias_size);
-    is.read(reinterpret_cast<char *>(weight.get()), mlh.weight_size);
-    is.read(reinterpret_cast<char *>(bias.get()), mlh.bias_size);
+    is.read(reinterpret_cast<char *>(weight.get()),
+            mlh.weight_size * sizeof(float));
+    is.read(reinterpret_cast<char *>(bias.get()),
+            mlh.bias_size * sizeof(float));
     model.push_back({std::move(weight), std::move(bias)});
   }
   return model;
@@ -73,14 +75,14 @@ FloatArr ReadInput(std::istream &is) {
   // read input
   std::vector<float> arr;
   while (!is.fail() && !is.eof()) {
-    uint8_t cur;
-    is.read(reinterpret_cast<char *>(&cur), 1);
-    arr.push_back(static_cast<float>(cur));
+    float cur;
+    is.read(reinterpret_cast<char *>(&cur), sizeof(float));
+    arr.push_back(cur);
   }
   if (is.fail() && !is.eof()) throw std::runtime_error("File error!");
   // copy to float array
   auto input = std::make_unique<float[]>(arr.size());
-  std::memcpy(input.get(), arr.data(), arr.size());
+  std::memcpy(input.get(), arr.data(), arr.size() * sizeof(float));
   return input;
 }
 
