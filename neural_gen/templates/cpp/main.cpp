@@ -4,6 +4,9 @@
 #define OUTPUT_SIZE 10
 #endif  // GENERATED
 
+// expand declarations of all layers
+NETWORK_LAYERS(DECL_EXPANDER);
+
 namespace {
 
 /*
@@ -130,7 +133,7 @@ int main(int argc, const char *argv[]) {
   auto model = ReadModel(ifs);
 
   // read inputs
-  for (size_t i = 2; i < argc; ++i) {
+  for (int i = 2; i < argc; ++i) {
     OpenFile(ifs, argv[i]);
     auto input = ReadInput(ifs);
     // infer

@@ -25,11 +25,11 @@
 #define FULL_CONN(id) CONCAT(FullConn_, id)
 
 #define DECL_LAYER(type, id) \
-  void type(id)(float *in, float *out, float *weight, float *bias)
+  static void type(id)(float *in, float *out, float *weight, float *bias)
 
+#define DECL_EXPANDER(type, id, out_size) DECL_LAYER(type, id);
 #define NETWORK_EXPANDER(type, id, out_size)                   \
   do {                                                         \
-    DECL_LAYER(type, id);                                      \
     auto output = std::make_unique<float[]>(out_size);         \
     type(id)(input.get(), output.get(), model[id].first.get(), \
              model[id].second.get());                          \
