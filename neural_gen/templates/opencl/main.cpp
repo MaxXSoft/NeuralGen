@@ -1,6 +1,6 @@
 #ifndef GENERATED
+const char *kOpenCLOptions = "";
 const char *kOpenCLProgram = "";
-const char *kOpenCLOption = "";
 #define NETWORK_LAYERS(e) e(CONV_3D, 0, 28, 28, 6) e(FULL_CONN, 1, 10, 1, 1)
 #define OUTPUT_SIZE 10
 #endif  // GENERATED
@@ -88,11 +88,11 @@ std::vector<cl_device_id> devices;
 // the selected OpenCL device
 cl_device_id device;
 // OpenCL context
-ContextPtr context;
+ContextPtr context = {nullptr, nullptr};
 // OpenCL command queue
-CmdQueuePtr cmd_queue;
+CmdQueuePtr cmd_queue = {nullptr, nullptr};
 // OpenCL program
-ProgramPtr program;
+ProgramPtr program = {nullptr, nullptr};
 // OpenCL kernels of all layers
 std::unordered_map<size_t, KernelPtr> kernels;
 
@@ -150,7 +150,7 @@ void LoadProgram() {
   if (err) throw std::runtime_error("failed to create program");
   // build program for devices
   if (clBuildProgram(program.get(), devices.size(), devices.data(),
-                     kOpenCLOption, nullptr, nullptr)) {
+                     kOpenCLOptions, nullptr, nullptr)) {
     // read compile log
     size_t log_size;
     clGetProgramBuildInfo(program.get(), device, CL_PROGRAM_BUILD_LOG, 0,
@@ -165,12 +165,13 @@ void LoadProgram() {
 
 // initialize kernels of all layers
 void InitKernels() {
-#define NETWORK_EXPANDER(type, id, width, height, depth)                   \
-  do {                                                                     \
-    cl_int err;                                                            \
-    kernels[id] = KernelPtr(clCreateKernel(program.get(), type(id), &err), \
-                            clReleaseKernel);                              \
-    if (err) throw std::runtime_error("failed to create kernel");          \
+#define NETWORK_EXPANDER(type, id, width, height, depth)              \
+  do {                                                                \
+    cl_int err;                                                       \
+    kernels.insert(                                                   \
+        {id, KernelPtr(clCreateKernel(program.get(), type(id), &err), \
+                       clReleaseKernel)});                            \
+    if (err) throw std::runtime_error("failed to create kernel");     \
   } while (0);
 
   NETWORK_LAYERS(NETWORK_EXPANDER);
@@ -190,9 +191,8 @@ BufferPtr NewBuffer(size_t size, cl_mem_flags flags) {
 
 // write data to the specific OpenCL buffer
 void WriteBuffer(const BufferPtr &buffer, void *mem, size_t size) {
-  if (clEnqueueWriteBuffer(cmd_queue.get(), buffer.get(), CL_FALSE, 0,
-                           size * sizeof(float), mem, 0, nullptr,
-                           nullptr)) {
+  if (clEnqueueWriteBuffer(cmd_queue.get(), buffer.get(), CL_FALSE, 0, size,
+                           mem, 0, nullptr, nullptr)) {
     throw std::runtime_error("failed to write OpenCL buffer");
   }
 }
@@ -228,13 +228,20 @@ ModelData ReadModel(std::istream &is) {
     is.read(reinterpret_cast<char *>(bias.get()),
             mlh.bias_size * sizeof(float));
     // create buffer for weight & bias
-    auto weight_buf =
-        NewBuffer(mlh.weight_size * sizeof(float), CL_MEM_READ_ONLY);
-    auto bias_buf =
-        NewBuffer(mlh.bias_size * sizeof(float), CL_MEM_READ_ONLY);
-    WriteBuffer(weight_buf, weight.get(), mlh.weight_size * sizeof(float));
-    WriteBuffer(bias_buf, bias.get(), mlh.bias_size * sizeof(float));
-    model.push_back({std::move(weight_buf), std::move(bias_buf)});
+    if (!mlh.weight_size || !mlh.bias_size) {
+      model.push_back(
+          {BufferPtr(nullptr, nullptr), BufferPtr(nullptr, nullptr)});
+    }
+    else {
+      auto weight_buf =
+          NewBuffer(mlh.weight_size * sizeof(float), CL_MEM_READ_ONLY);
+      auto bias_buf =
+          NewBuffer(mlh.bias_size * sizeof(float), CL_MEM_READ_ONLY);
+      WriteBuffer(weight_buf, weight.get(),
+                  mlh.weight_size * sizeof(float));
+      WriteBuffer(bias_buf, bias.get(), mlh.bias_size * sizeof(float));
+      model.push_back({std::move(weight_buf), std::move(bias_buf)});
+    }
   }
   return model;
 }
@@ -254,35 +261,37 @@ FloatVec ReadInput(std::istream &is) {
 
 // infer
 FloatArr Infer(const ModelData &model, FloatVec input) {
-#define NETWORK_EXPANDER(type, id, width, height, depth)                  \
-  do {                                                                    \
-    /* create output buffer */                                            \
-    auto out_buf = NewBuffer(width * height * depth * sizeof(float),      \
-                             CL_MEM_READ_WRITE);                          \
-    /* set kernel arguments */                                            \
-    auto in = buffer.get(), out = out_buf.get();                          \
-    auto weight = model[id].first.get(), bias = model[id].second.get();   \
-    if (clSetKernelArg(kernels[id].get(), 0, sizeof(cl_mem), &in) ||      \
-        clSetKernelArg(kernels[id].get(), 1, sizeof(cl_mem), &out) ||     \
-        clSetKernelArg(kernels[id].get(), 2, sizeof(cl_mem), &weight) ||  \
-        clSetKernelArg(kernels[id].get(), 3, sizeof(cl_mem), &bias)) {    \
-      throw std::runtime_error("failed to set argument");                 \
-    }                                                                     \
-    /* run kernel */                                                      \
-    cl_int ret;                                                           \
-    size_t global_worksize[3] = {depth, height, width};                   \
-    if ((ret = clEnqueueNDRangeKernel(cmd_queue.get(), kernels[id].get(), \
-                                      3, nullptr, global_worksize,        \
-                                      nullptr, 0, nullptr, nullptr))) {   \
-      throw std::runtime_error(                                           \
-          "error when executing kernel, error code: " +                   \
-          std::to_string(ret));                                           \
-    }                                                                     \
-    clFinish(cmd_queue.get());                                            \
-    /* update for next layer */                                           \
-    buffer = std::move(out_buf);                                          \
-    out_id = id;                                                          \
-    last_out_size = width * height * depth;                               \
+#define NETWORK_EXPANDER(type, id, width, height, depth)                 \
+  do {                                                                   \
+    /* create output buffer */                                           \
+    auto out_buf = NewBuffer(width * height * depth * sizeof(float),     \
+                             CL_MEM_READ_WRITE);                         \
+    /* get pointer of the current kernel */                              \
+    const auto &kernel = kernels.find(id)->second;                       \
+    /* set kernel arguments */                                           \
+    auto in = buffer.get(), out = out_buf.get();                         \
+    auto weight = model[id].first.get(), bias = model[id].second.get();  \
+    if (clSetKernelArg(kernel.get(), 0, sizeof(cl_mem), &in) ||          \
+        clSetKernelArg(kernel.get(), 1, sizeof(cl_mem), &out) ||         \
+        clSetKernelArg(kernel.get(), 2, sizeof(cl_mem), &weight) ||      \
+        clSetKernelArg(kernel.get(), 3, sizeof(cl_mem), &bias)) {        \
+      throw std::runtime_error("failed to set argument");                \
+    }                                                                    \
+    /* run kernel */                                                     \
+    cl_int ret;                                                          \
+    size_t global_worksize[3] = {depth, height, width};                  \
+    if ((ret = clEnqueueNDRangeKernel(cmd_queue.get(), kernel.get(), 3,  \
+                                      nullptr, global_worksize, nullptr, \
+                                      0, nullptr, nullptr))) {           \
+      throw std::runtime_error(                                          \
+          "error when executing kernel, error code: " +                  \
+          std::to_string(ret));                                          \
+    }                                                                    \
+    clFinish(cmd_queue.get());                                           \
+    /* update for next layer */                                          \
+    buffer = std::move(out_buf);                                         \
+    out_id = id;                                                         \
+    last_out_size = width * height * depth;                              \
   } while (0);
 
   size_t out_id = 0, last_out_size;
@@ -350,7 +359,7 @@ int main(int argc, const char *argv[]) {
   auto model = ReadModel(ifs);
 
   // read inputs
-  for (int i = 2; i < argc; ++i) {
+  for (int i = 4; i < argc; ++i) {
     // read input from file
     OpenFile(ifs, argv[i]);
     auto input = ReadInput(ifs);
