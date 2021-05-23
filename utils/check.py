@@ -39,9 +39,11 @@ if __name__ == '__main__':
     exit(1)
   try:
     c, t = check(argv[1], argv[2], argv[3])
+    usage = getrusage(RUSAGE_CHILDREN)
     print(f'Correct/Total: {c}/{t}')
     print(f'Correct Rate: {c * 100 / t}%')
-    print(f'Total User Time: {getrusage(RUSAGE_CHILDREN).ru_utime * 1000:.2f}ms')
+    print(f'Total User Time: {usage.ru_utime * 1000:.2f}ms')
+    print(f'Total System Time: {usage.ru_stime * 1000:.2f}ms')
   except CalledProcessError:
     print('Failed to run network!')
     exit(1)
