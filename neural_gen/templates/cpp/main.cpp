@@ -5,7 +5,9 @@
 #endif  // GENERATED
 
 // expand declarations of all layers
+#define DECL_EXPANDER(type, id, out_size) DECL_LAYER(type, id);
 NETWORK_LAYERS(DECL_EXPANDER);
+#undef DECL_EXPANDER
 
 namespace {
 
@@ -91,8 +93,18 @@ FloatArr ReadInput(std::istream &is) {
 
 // infer
 FloatArr Infer(const ModelData &model, FloatArr input) {
+#define NETWORK_EXPANDER(type, id, out_size)                   \
+  do {                                                         \
+    auto output = std::make_unique<float[]>(out_size);         \
+    type(id)(input.get(), output.get(), model[id].first.get(), \
+             model[id].second.get());                          \
+    input = std::move(output);                                 \
+  } while (0);
+
   NETWORK_LAYERS(NETWORK_EXPANDER);
   return input;
+
+#undef NETWORK_EXPANDER
 }
 
 // dump output to stderr

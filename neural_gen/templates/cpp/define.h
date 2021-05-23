@@ -64,15 +64,6 @@ using VecN = __m256;
 #define DECL_LAYER(type, id) \
   static void type(id)(float *in, float *out, float *weight, float *bias)
 
-#define DECL_EXPANDER(type, id, out_size) DECL_LAYER(type, id);
-#define NETWORK_EXPANDER(type, id, out_size)                   \
-  do {                                                         \
-    auto output = std::make_unique<float[]>(out_size);         \
-    type(id)(input.get(), output.get(), model[id].first.get(), \
-             model[id].second.get());                          \
-    input = std::move(output);                                 \
-  } while (0);
-
 inline size_t GetIndex(size_t x, size_t y, size_t channel, size_t width,
                        size_t height, size_t depth) {
   assert(x >= 0 && x < width);
