@@ -6,7 +6,7 @@ def main() -> None:
   import argparse
   import json
   from neural_gen.network import from_dict
-  from neural_gen.generator import CppGenerator
+  from neural_gen.generator import CppGenerator, OpenCLGenerator
 
   # initialize parser
   parser = argparse.ArgumentParser(prog='neural_gen')
@@ -16,7 +16,7 @@ def main() -> None:
   parser.add_argument('descriptor', type=str,
                       help='neural network descriptor (json)')
   parser.add_argument('-g', '--gen', default='cpp', type=str,
-                      help='type of generator (cpp), default to "cpp"')
+                      help='type of generator (cpp/opencl), default to "cpp"')
   parser.add_argument('-o', '--output', type=str,
                       help='file name of generated code')
   parser.add_argument('-v', '--version', action='version',
@@ -35,6 +35,7 @@ def main() -> None:
   # generate code
   gen = {
       'cpp': CppGenerator,
+      'opencl': OpenCLGenerator,
   }[args.gen]()
   gen.generate(network)
   with open(args.output, 'w') as f:
