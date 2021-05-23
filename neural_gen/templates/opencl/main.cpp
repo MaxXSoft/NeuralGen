@@ -191,7 +191,7 @@ BufferPtr NewBuffer(size_t size, cl_mem_flags flags) {
 
 // write data to the specific OpenCL buffer
 void WriteBuffer(const BufferPtr &buffer, void *mem, size_t size) {
-  if (clEnqueueWriteBuffer(cmd_queue.get(), buffer.get(), CL_FALSE, 0, size,
+  if (clEnqueueWriteBuffer(cmd_queue.get(), buffer.get(), CL_TRUE, 0, size,
                            mem, 0, nullptr, nullptr)) {
     throw std::runtime_error("failed to write OpenCL buffer");
   }
