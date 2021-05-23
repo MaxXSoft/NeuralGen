@@ -16,6 +16,10 @@
 #include <utility>      // main
 #include <vector>       // main
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif  // _OPENMP
+
 #define CONCAT_IMPL(x, y) x##y
 #define CONCAT(x, y) CONCAT_IMPL(x, y)
 
