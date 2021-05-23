@@ -8,18 +8,16 @@ DECL_LAYER(CONV_3D, LAYER_ID) {
   out[index] = 0.0;
   // perform convolution
   for (size_t inc = 0; inc < INPUT_DEPTH; ++inc) {
-    size_t addr1 =
-        GetIndex(0, 0, INPUT_DEPTH * channel + inc, KERNEL_WIDTH,
-                  KERNEL_HEIGHT, OUTPUT_DEPTH * INPUT_DEPTH);
-    size_t addr2 =
-        GetIndex(0, 0, inc, INPUT_WIDTH, INPUT_HEIGHT, INPUT_DEPTH);
+    size_t addr1 = GetIndex(0, 0, INPUT_DEPTH * channel + inc, KERNEL_WIDTH,
+                            KERNEL_HEIGHT);
+    size_t addr2 = GetIndex(0, 0, inc, INPUT_WIDTH, INPUT_HEIGHT);
     // kernel
-    const float *pw = weight + addr1;
+    global const float *pw = weight + addr1;
     // input
-    const float *pi = in + addr2;
+    global const float *pi = in + addr2;
     float sum = 0.0;
-    const float *ppw = pw;
-    const float *ppi = pi + y * INPUT_WIDTH + x;
+    global const float *ppw = pw;
+    global const float *ppi = pi + y * INPUT_WIDTH + x;
     for (size_t wy = 0; wy < KERNEL_HEIGHT; wy++) {
       for (size_t wx = 0; wx < KERNEL_WIDTH; wx++) {
         sum += *ppw++ * ppi[wy * INPUT_WIDTH + wx];

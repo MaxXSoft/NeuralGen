@@ -1,6 +1,3 @@
-#include <cassert>
-#include <cstddef>
-
 #define CONCAT_IMPL(x, y) x##y
 #define CONCAT(x, y) CONCAT_IMPL(x, y)
 
@@ -14,14 +11,10 @@
                        global float *weight, global float *bias)
 
 inline size_t GetIndex(size_t x, size_t y, size_t channel, size_t width,
-                       size_t height, size_t depth) {
-  assert(x >= 0 && x < width);
-  assert(y >= 0 && y < height);
-  assert(channel >= 0 && channel < depth);
+                       size_t height) {
   return (height * channel + y) * width + x;
 }
 
 inline float ACT_FUNC(tanh)(float x) {
-  auto ep = exp(x), em = exp(-x);
-  return (ep - em) / (ep + em);
+  return tanh(x);
 }

@@ -1,3 +1,5 @@
+#define SCALE_FACTOR (1.0 / (KERNEL_WIDTH * KERNEL_HEIGHT))
+
 DECL_LAYER(POOLING, LAYER_ID) {
   size_t i = get_global_id(0);
   size_t y = get_global_id(1);
@@ -15,8 +17,7 @@ DECL_LAYER(POOLING, LAYER_ID) {
           weight[i] * in[(rows + m) * INPUT_WIDTH + cols + n + block];
     }
   }
-  constexpr float kScaleFactor = 1.0 / (KERNEL_WIDTH * KERNEL_HEIGHT);
-  out[index] *= kScaleFactor;
+  out[index] *= SCALE_FACTOR;
 #elif defined(FUNCTION_MAX)
   out[index] = -1e9;
   for (size_t m = 0; m < KERNEL_WIDTH; m++) {
