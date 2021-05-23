@@ -12,9 +12,9 @@ def chunks(l: List[Any], n: int) -> Iterator[List[Any]]:
     yield l[i:i + n]
 
 
-def check_case(network: str, model: str, files: List[str]) -> int:
+def check_case(args: List[str], files: List[str]) -> int:
   expected = [i[:-4].split('-')[-1] for i in files]
-  out = check_output([network, model] + files, stderr=DEVNULL)
+  out = check_output(args + files, stderr=DEVNULL)
   out = out.decode('utf-8').strip().split('\n')
   correct = 0
   for (x, y) in zip(expected, out):
@@ -23,22 +23,21 @@ def check_case(network: str, model: str, files: List[str]) -> int:
   return correct
 
 
-def check(network: str, model: str, test_dir: str) -> Tuple[int, int]:
+def check(args: List[str], test_dir: str) -> Tuple[int, int]:
   total = 0
   correct = 0
   for c in chunks(listdir(test_dir), 50):
     total += len(c)
-    correct += check_case(network, model,
-                          list(map(lambda x: path.join(test_dir, x), c)))
+    correct += check_case(args, list(map(lambda x: path.join(test_dir, x), c)))
   return correct, total
 
 
 if __name__ == '__main__':
   if len(argv) < 4:
-    print(f'Usage: {argv[0]} NETWORK MODEL TEST_DIR')
+    print(f'Usage: {argv[0]} <ARGS ...> TEST_DIR')
     exit(1)
   try:
-    c, t = check(argv[1], argv[2], argv[3])
+    c, t = check(argv[1:-1], argv[-1])
     usage = getrusage(RUSAGE_CHILDREN)
     print(f'Correct/Total: {c}/{t}')
     print(f'Correct Rate: {c * 100 / t}%')
