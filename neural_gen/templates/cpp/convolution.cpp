@@ -16,13 +16,10 @@
 #define ACTIVATION tanh
 #endif  // GENERATED
 
-// for SIMD
-#define OUTPUT_WIDTH_ALIGN4 ((OUTPUT_WIDTH) / 4 * 4)
-#define OUTPUT_WIDTH_REMAIN ((OUTPUT_WIDTH)-OUTPUT_WIDTH_ALIGN4)
-
 DECL_LAYER(CONV_3D, LAYER_ID) {
 #ifdef _OPENMP
-#if defined(SIMD) && OUTPUT_WIDTH_ALIGN4 != 0 && OUTPUT_WIDTH_REMAIN != 0
+#if defined(SIMD) && SIMD_ALIGN(OUTPUT_WIDTH) != 0 && \
+    SIMD_REMAIN(OUTPUT_WIDTH) != 0
 #pragma omp parallel for collapse(2)
 #else
 #pragma omp parallel for collapse(3)
@@ -31,13 +28,13 @@ DECL_LAYER(CONV_3D, LAYER_ID) {
   for (size_t channel = 0; channel < OUTPUT_DEPTH; ++channel) {
     for (size_t y = 0; y < OUTPUT_HEIGHT; ++y) {
 #ifdef SIMD
-#if OUTPUT_WIDTH_ALIGN4 != 0
-      for (size_t x = 0; x < OUTPUT_WIDTH_ALIGN4; x += 4) {
+#if SIMD_ALIGN(OUTPUT_WIDTH) != 0
+      for (size_t x = 0; x < SIMD_ALIGN(OUTPUT_WIDTH); x += SIMD_VEC_LEN) {
         // current neuron
         size_t index =
             (channel * OUTPUT_HEIGHT * OUTPUT_WIDTH) + y * OUTPUT_WIDTH + x;
-        __m128 mm_bias = _mm_broadcast_ss(bias + channel);
-        __m128 mm_cur = _mm_setzero_ps();
+        VecN mm_bias = SIMD_MM(broadcast_ss)(bias + channel);
+        VecN mm_cur = SIMD_MM(setzero_ps)();
         // perform convolution
         for (size_t inc = 0; inc < INPUT_DEPTH; ++inc) {
           size_t addr1 =
@@ -45,7 +42,7 @@ DECL_LAYER(CONV_3D, LAYER_ID) {
                        KERNEL_HEIGHT, OUTPUT_DEPTH * INPUT_DEPTH);
           size_t addr2 =
               GetIndex(0, 0, inc, INPUT_WIDTH, INPUT_HEIGHT, INPUT_DEPTH);
-          __m128 mm_sum = _mm_setzero_ps();
+          VecN mm_sum = SIMD_MM(setzero_ps)();
           // kernel
           const float *pw = weight + addr1;
           const float *ppw = pw;
@@ -54,23 +51,28 @@ DECL_LAYER(CONV_3D, LAYER_ID) {
           const float *ppi = pi + y * INPUT_WIDTH + x;
           for (size_t wy = 0; wy < KERNEL_HEIGHT; wy++) {
             for (size_t wx = 0; wx < KERNEL_WIDTH; wx++) {
-              __m128 mm_weight = _mm_broadcast_ss(ppw++);
-              __m128 mm_in = _mm_loadu_ps(ppi + wy * INPUT_WIDTH + wx);
-              mm_sum = _mm_add_ps(mm_sum, _mm_mul_ps(mm_weight, mm_in));
+              VecN mm_weight = SIMD_MM(broadcast_ss)(ppw++);
+              VecN mm_in = SIMD_MM(loadu_ps)(ppi + wy * INPUT_WIDTH + wx);
+              mm_sum = SIMD_MM(add_ps)(mm_sum,
+                                       SIMD_MM(mul_ps)(mm_weight, mm_in));
             }
           }
-          mm_cur = _mm_add_ps(mm_cur, mm_sum);
+          mm_cur = SIMD_MM(add_ps)(mm_cur, mm_sum);
         }
         // add bias and perform activation
-        _mm_storeu_ps(out + index, _mm_add_ps(mm_cur, mm_bias));
+        SIMD_MM(storeu_ps)(out + index, SIMD_MM(add_ps)(mm_cur, mm_bias));
         out[index + 0] = ACT_FUNC(ACTIVATION)(out[index + 0]);
         out[index + 1] = ACT_FUNC(ACTIVATION)(out[index + 1]);
         out[index + 2] = ACT_FUNC(ACTIVATION)(out[index + 2]);
         out[index + 3] = ACT_FUNC(ACTIVATION)(out[index + 3]);
+        out[index + 4] = ACT_FUNC(ACTIVATION)(out[index + 4]);
+        out[index + 5] = ACT_FUNC(ACTIVATION)(out[index + 5]);
+        out[index + 6] = ACT_FUNC(ACTIVATION)(out[index + 6]);
+        out[index + 7] = ACT_FUNC(ACTIVATION)(out[index + 7]);
       }
 #endif
-#if OUTPUT_WIDTH_REMAIN != 0
-      for (size_t x = OUTPUT_WIDTH_ALIGN4; x < OUTPUT_WIDTH; ++x) {
+#if SIMD_REMAIN(OUTPUT_WIDTH) != 0
+      for (size_t x = SIMD_ALIGN(OUTPUT_WIDTH); x < OUTPUT_WIDTH; ++x) {
         // current neuron
         size_t index =
             (channel * OUTPUT_HEIGHT * OUTPUT_WIDTH) + y * OUTPUT_WIDTH + x;
@@ -147,5 +149,3 @@ DECL_LAYER(CONV_3D, LAYER_ID) {
 #undef OUTPUT_HEIGHT
 #undef OUTPUT_DEPTH
 #undef ACTIVATION
-#undef OUTPUT_WIDTH_ALIGN4
-#undef OUTPUT_WIDTH_REMAIN
