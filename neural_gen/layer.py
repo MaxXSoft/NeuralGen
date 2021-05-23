@@ -1,4 +1,4 @@
-from typing import Dict, Any, Type
+from typing import Dict, Any, Type, Tuple
 
 
 class Layer:
@@ -22,6 +22,12 @@ class Layer:
   def to_dict(self) -> Dict[str, Any]:
     '''
     Convert the current layer to a dictionary.
+    '''
+    raise NotImplementedError
+
+  def get_output_shape(self) -> Tuple[int, int, int]:
+    '''
+    Get output shape (width, height, depth).
     '''
     raise NotImplementedError
 
@@ -58,6 +64,9 @@ class Input(Layer):
         'depth': self.__depth,
     }
 
+  def get_output_shape(self) -> Tuple[int, int, int]:
+    return (self.__width, self.__height, self.__depth)
+
   def get_output_size(self) -> int:
     return self.__width * self.__height * self.__depth
 
@@ -88,6 +97,9 @@ class Convolution(Layer):
         'output': self.__output,
         'activation': self.__activation,
     }
+
+  def get_output_shape(self) -> Tuple[int, int, int]:
+    return (self.__output['width'], self.__output['height'], self.__output['depth'])
 
   def get_output_size(self) -> int:
     return self.__output['width'] * self.__output['height'] * self.__output['depth']
@@ -122,6 +134,9 @@ class Pooling(Layer):
         'activation': self.__activation,
     }
 
+  def get_output_shape(self) -> Tuple[int, int, int]:
+    return (self.__output['width'], self.__output['height'], self.__output['depth'])
+
   def get_output_size(self) -> int:
     return self.__output['width'] * self.__output['height'] * self.__output['depth']
 
@@ -146,6 +161,9 @@ class FullConnection(Layer):
         'output_size': self.__output_size,
         'activation': self.__activation,
     }
+
+  def get_output_shape(self) -> Tuple[int, int, int]:
+    return (1, 1, self.__output_size)
 
   def get_output_size(self) -> int:
     return self.__output_size
