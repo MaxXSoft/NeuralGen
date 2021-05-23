@@ -20,6 +20,11 @@
 #include <omp.h>
 #endif  // _OPENMP
 
+#if defined(__AVX__) || defined(__AVX2__)
+#define SIMD
+#include <immintrin.h>
+#endif  // __AVX__ || __AVX2__
+
 #define CONCAT_IMPL(x, y) x##y
 #define CONCAT(x, y) CONCAT_IMPL(x, y)
 
