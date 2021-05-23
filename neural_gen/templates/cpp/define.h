@@ -21,8 +21,36 @@
 #endif  // _OPENMP
 
 #if defined(__AVX__) || defined(__AVX2__)
-#define SIMD
 #include <immintrin.h>
+
+// enable SIMD
+#define SIMD
+
+// length of the SIMD vector (4 or 8)
+#ifndef SIMD_VEC_LEN
+#define SIMD_VEC_LEN 4
+#endif
+#if SIMD_VEC_LEN != 4 && SIMD_VEC_LEN != 8
+#error SIMD_VEC_LEN must be 4 or 8
+#endif
+
+// type of SIMD vector
+#if SIMD_VEC_LEN == 4
+using VecN = __m128;
+#else  // SIMD_VEC_LEN == 8
+using VecN = __m256;
+#endif
+
+// SIMD intrinsic
+#if SIMD_VEC_LEN == 4
+#define SIMD_MM(name) _mm_##name
+#else  // SIMD_VEC_LEN == 8
+#define SIMD_MM(name) _mm256_##name
+#endif
+
+// align for SIMD vector boundary
+#define SIMD_ALIGN(x) ((x) / SIMD_VEC_LEN * SIMD_VEC_LEN)
+#define SIMD_REMAIN(x) ((x) % SIMD_VEC_LEN)
 #endif  // __AVX__ || __AVX2__
 
 #define CONCAT_IMPL(x, y) x##y
