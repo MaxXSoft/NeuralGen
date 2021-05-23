@@ -123,6 +123,15 @@ int main(int argc, const char *argv[]) {
   // check & parse command line arguments
   if (argc < 3) {
     std::cerr << "Usage: " << argv[0] << " MODEL <INPUT ...>" << std::endl;
+#ifdef _OPENMP
+#pragma omp parallel
+    {
+      if (!omp_get_thread_num()) {
+        std::cerr << "OpenMP enabled with " << omp_get_num_threads()
+                  << " threads." << std::endl;
+      }
+    }
+#endif  // _OPENMP
     return 1;
   }
   std::string_view mod_file = argv[1];
