@@ -232,7 +232,11 @@ class OpenCLGenerator(Generator):
 
   def generate(self, network: Network) -> None:
     self.__code = '#define GENERATED\n\n'
-    self.__code += f'const char *kOpenCLOptions = "{"-DOPT" if self.__opt else ""}";\n'
+    if self.__opt:
+      self.__code += '#define OPT\n'
+      self.__code += 'const char *kOpenCLOptions = "-DOPT";\n'
+    else:
+      self.__code += 'const char *kOpenCLOptions = "";\n'
     self.__code += 'const char *kOpenCLProgram = R"(\n'
     self.__code += f'{self.__define}\n'
     # generate all layers
