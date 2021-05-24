@@ -261,36 +261,66 @@ FloatVec ReadInput(std::istream &is) {
 
 // infer
 FloatArr Infer(const ModelData &model, FloatVec input) {
-#define NETWORK_EXPANDER(type, id, width, height, depth)                 \
-  do {                                                                   \
-    /* create output buffer */                                           \
-    auto out_buf = NewBuffer(width * height * depth * sizeof(float),     \
-                             CL_MEM_READ_WRITE);                         \
-    /* get pointer of the current kernel */                              \
-    const auto &kernel = kernels.find(id)->second;                       \
-    /* set kernel arguments */                                           \
-    auto in = buffer.get(), out = out_buf.get();                         \
-    auto weight = model[id].first.get(), bias = model[id].second.get();  \
-    if (clSetKernelArg(kernel.get(), 0, sizeof(cl_mem), &in) ||          \
-        clSetKernelArg(kernel.get(), 1, sizeof(cl_mem), &out) ||         \
-        clSetKernelArg(kernel.get(), 2, sizeof(cl_mem), &weight) ||      \
-        clSetKernelArg(kernel.get(), 3, sizeof(cl_mem), &bias)) {        \
-      throw std::runtime_error("failed to set argument");                \
-    }                                                                    \
-    /* run kernel */                                                     \
-    cl_int ret;                                                          \
-    size_t global_worksize[3] = {depth, height, width};                  \
-    if ((ret = clEnqueueNDRangeKernel(cmd_queue.get(), kernel.get(), 3,  \
-                                      nullptr, global_worksize, nullptr, \
-                                      0, nullptr, nullptr))) {           \
-      throw std::runtime_error(                                          \
-          "error when executing kernel, error code: " +                  \
-          std::to_string(ret));                                          \
-    }                                                                    \
-    clFinish(cmd_queue.get());                                           \
-    /* update for next layer */                                          \
-    buffer = std::move(out_buf);                                         \
-    last_out_size = width * height * depth;                              \
+#ifdef OPT
+#define RUN_KERNEL(id, width, height, depth)                              \
+  do {                                                                    \
+    cl_int ret;                                                           \
+    size_t local[3] = {1, 1, 1};                                          \
+    if (width == height) {                                                \
+      for (int i = 10; i > 1; --i) {                                      \
+        if (width % i == 0) {                                             \
+          local[1] = local[2] = i;                                        \
+          break;                                                          \
+        }                                                                 \
+      }                                                                   \
+    }                                                                     \
+    size_t global[3] = {depth, height, width};                            \
+    if ((ret = clEnqueueNDRangeKernel(cmd_queue.get(), kernel.get(), 3,   \
+                                      nullptr, global, local, 0, nullptr, \
+                                      nullptr))) {                        \
+      throw std::runtime_error("error when executing kernel " #id         \
+                               ", error code: " +                         \
+                               std::to_string(ret));                      \
+    }                                                                     \
+    clFinish(cmd_queue.get());                                            \
+  } while (0)
+#else
+#define RUN_KERNEL(id, width, height, depth)                            \
+  do {                                                                  \
+    cl_int ret;                                                         \
+    size_t global[3] = {depth, height, width};                          \
+    if ((ret = clEnqueueNDRangeKernel(cmd_queue.get(), kernel.get(), 3, \
+                                      nullptr, global, nullptr, 0,      \
+                                      nullptr, nullptr))) {             \
+      throw std::runtime_error("error when executing kernel " #id       \
+                               ", error code: " +                       \
+                               std::to_string(ret));                    \
+    }                                                                   \
+    clFinish(cmd_queue.get());                                          \
+  } while (0)
+#endif  // OPT
+
+#define NETWORK_EXPANDER(type, id, width, height, depth)                \
+  do {                                                                  \
+    /* create output buffer */                                          \
+    auto out_buf = NewBuffer(width * height * depth * sizeof(float),    \
+                             CL_MEM_READ_WRITE);                        \
+    /* get pointer of the current kernel */                             \
+    const auto &kernel = kernels.find(id)->second;                      \
+    /* set kernel arguments */                                          \
+    auto in = buffer.get(), out = out_buf.get();                        \
+    auto weight = model[id].first.get(), bias = model[id].second.get(); \
+    if (clSetKernelArg(kernel.get(), 0, sizeof(cl_mem), &in) ||         \
+        clSetKernelArg(kernel.get(), 1, sizeof(cl_mem), &out) ||        \
+        clSetKernelArg(kernel.get(), 2, sizeof(cl_mem), &weight) ||     \
+        clSetKernelArg(kernel.get(), 3, sizeof(cl_mem), &bias)) {       \
+      throw std::runtime_error("failed to set argument");               \
+    }                                                                   \
+    /* run kernel */                                                    \
+    RUN_KERNEL(id, width, height, depth);                               \
+    /* update for next layer */                                         \
+    buffer = std::move(out_buf);                                        \
+    last_out_size = width * height * depth;                             \
   } while (0);
 
   size_t last_out_size;
