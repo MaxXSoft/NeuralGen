@@ -18,9 +18,12 @@
 
 DECL_LAYER(CONV_3D, LAYER_ID) {
 #ifdef _OPENMP
-#if defined(SIMD) && SIMD_ALIGN(OUTPUT_WIDTH) != 0 && \
-    SIMD_REMAIN(OUTPUT_WIDTH) != 0
+#if defined(SIMD)
+#if SIMD_ALIGN(OUTPUT_WIDTH) != 0 && SIMD_REMAIN(OUTPUT_WIDTH) != 0
 #pragma omp parallel for collapse(2)
+#else
+#pragma omp parallel for collapse(3)
+#endif
 #else
 #pragma omp parallel for collapse(3)
 #endif
