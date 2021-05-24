@@ -40,15 +40,15 @@ clean:
 	-rm $(NETWORKS) $(NETWORK_SRCS)
 
 test: $(BUILD_DIR) $(NETWORKS)
-	$(CHECKER) $(BUILD_DIR)/cpu $(MODEL_DIR)/lenet5.model $(TEST_DIR)
-	$(CHECKER) $(BUILD_DIR)/cpu_o3 $(MODEL_DIR)/lenet5.model $(TEST_DIR)
-	$(CHECKER) $(BUILD_DIR)/cpu_o3_omp $(MODEL_DIR)/lenet5.model $(TEST_DIR)
-	$(CHECKER) $(BUILD_DIR)/cpu_o3_simd4 $(MODEL_DIR)/lenet5.model $(TEST_DIR)
-	$(CHECKER) $(BUILD_DIR)/cpu_o3_simd8 $(MODEL_DIR)/lenet5.model $(TEST_DIR)
-	$(CHECKER) $(BUILD_DIR)/cpu_o3_omp_simd4 $(MODEL_DIR)/lenet5.model $(TEST_DIR)
-	$(CHECKER) $(BUILD_DIR)/cpu_o3_omp_simd8 $(MODEL_DIR)/lenet5.model $(TEST_DIR)
-	$(CHECKER) $(BUILD_DIR)/cl $(CL_PLAT_DEV) $(MODEL_DIR)/lenet5.model $(TEST_DIR)
-	$(CHECKER) $(BUILD_DIR)/cl_opt $(CL_PLAT_DEV) $(MODEL_DIR)/lenet5.model $(TEST_DIR)
+	-$(CHECKER) $(BUILD_DIR)/cpu $(MODEL_DIR)/lenet5.model $(TEST_DIR)
+	-$(CHECKER) $(BUILD_DIR)/cpu_o3 $(MODEL_DIR)/lenet5.model $(TEST_DIR)
+	-$(CHECKER) $(BUILD_DIR)/cpu_o3_omp $(MODEL_DIR)/lenet5.model $(TEST_DIR)
+	-$(CHECKER) $(BUILD_DIR)/cpu_o3_simd4 $(MODEL_DIR)/lenet5.model $(TEST_DIR)
+	-$(CHECKER) $(BUILD_DIR)/cpu_o3_simd8 $(MODEL_DIR)/lenet5.model $(TEST_DIR)
+	-$(CHECKER) $(BUILD_DIR)/cpu_o3_omp_simd4 $(MODEL_DIR)/lenet5.model $(TEST_DIR)
+	-$(CHECKER) $(BUILD_DIR)/cpu_o3_omp_simd8 $(MODEL_DIR)/lenet5.model $(TEST_DIR)
+	-$(CHECKER) $(BUILD_DIR)/cl $(CL_PLAT_DEV) $(MODEL_DIR)/lenet5.model $(TEST_DIR)
+	-$(CHECKER) $(BUILD_DIR)/cl_opt $(CL_PLAT_DEV) $(MODEL_DIR)/lenet5.model $(TEST_DIR)
 
 $(BUILD_DIR):
 	-mkdir $@
