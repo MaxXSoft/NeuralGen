@@ -7,11 +7,6 @@ from subprocess import check_output, DEVNULL, CalledProcessError
 from resource import getrusage, RUSAGE_CHILDREN
 
 
-def chunks(l: List[Any], n: int) -> Iterator[List[Any]]:
-  for i in range(0, len(l), n):
-    yield l[i:i + n]
-
-
 def check_case(args: List[str], files: List[str]) -> int:
   expected = [i[:-4].split('-')[-1] for i in files]
   out = check_output(args + files, stderr=DEVNULL)
@@ -24,11 +19,10 @@ def check_case(args: List[str], files: List[str]) -> int:
 
 
 def check(args: List[str], test_dir: str) -> Tuple[int, int]:
-  total = 0
-  correct = 0
-  for c in chunks(listdir(test_dir), 50):
-    total += len(c)
-    correct += check_case(args, list(map(lambda x: path.join(test_dir, x), c)))
+  files = listdir(test_dir)
+  total = len(files)
+  correct = check_case(args, list(
+      map(lambda x: path.join(test_dir, x), files)))
   return correct, total
 
 
