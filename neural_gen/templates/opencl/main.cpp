@@ -290,11 +290,10 @@ FloatArr Infer(const ModelData &model, FloatVec input) {
     clFinish(cmd_queue.get());                                           \
     /* update for next layer */                                          \
     buffer = std::move(out_buf);                                         \
-    out_id = id;                                                         \
     last_out_size = width * height * depth;                              \
   } while (0);
 
-  size_t out_id = 0, last_out_size;
+  size_t last_out_size;
   // create input buffer
   auto buffer = NewBuffer(input.size() * sizeof(float), CL_MEM_READ_ONLY);
   WriteBuffer(buffer, input.data(), input.size() * sizeof(float));
