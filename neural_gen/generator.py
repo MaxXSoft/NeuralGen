@@ -161,7 +161,8 @@ class OpenCLGenerator(Generator):
       'full_connection': 'FULL_CONN',
   }
 
-  def __init__(self) -> None:
+  def __init__(self, opt: bool) -> None:
+    self.__opt = opt
     # generated code
     self.__code = ''
     # load templates
@@ -231,7 +232,7 @@ class OpenCLGenerator(Generator):
 
   def generate(self, network: Network) -> None:
     self.__code = '#define GENERATED\n\n'
-    self.__code += 'const char *kOpenCLOptions = "";\n'
+    self.__code += f'const char *kOpenCLOptions = "{"-DOPT" if self.__opt else ""}";\n'
     self.__code += 'const char *kOpenCLProgram = R"(\n'
     self.__code += f'{self.__define}\n'
     # generate all layers

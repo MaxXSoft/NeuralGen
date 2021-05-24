@@ -35,7 +35,8 @@ def main() -> None:
   # generate code
   gen = {
       'cpp': CppGenerator,
-      'opencl': OpenCLGenerator,
+      'opencl': lambda: OpenCLGenerator(False),
+      'opencl-opt': lambda: OpenCLGenerator(True),
   }[args.gen]()
   gen.generate(network)
   with open(args.output, 'w') as f:
