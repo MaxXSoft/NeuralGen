@@ -1,7 +1,8 @@
 # macOS stuffs
 *.DS_Store
 
-# for debugging
+# for building & debugging
+build
 debug
 
 # python
