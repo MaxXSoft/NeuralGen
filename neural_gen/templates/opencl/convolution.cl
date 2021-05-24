@@ -13,13 +13,8 @@ DECL_LAYER(CONV_3D, LAYER_ID) {
     size_t addr2 = GetIndex(0, 0, inc, INPUT_WIDTH, INPUT_HEIGHT);
     float sum = 0.0;
     // kernel
-#ifdef OPT
-    constant const float *pw = weight + addr1;
-    constant const float *ppw = pw;
-#else
     global const float *pw = weight + addr1;
     global const float *ppw = pw;
-#endif  // OPT
     // input
     global const float *pi = in + addr2;
     global const float *ppi = pi + y * INPUT_WIDTH + x;
