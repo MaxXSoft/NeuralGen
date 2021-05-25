@@ -36,7 +36,7 @@ DECL_LAYER(CONV_3D, LAYER_ID) {
         // current neuron
         size_t index =
             (channel * OUTPUT_HEIGHT * OUTPUT_WIDTH) + y * OUTPUT_WIDTH + x;
-        VecN mm_bias = SIMD_MM(broadcast_ss)(bias + channel);
+        VecN mm_bias = SIMD_MM(set1_ps)(bias[channel]);
         VecN mm_cur = SIMD_MM(setzero_ps)();
         // perform convolution
         for (size_t inc = 0; inc < INPUT_DEPTH; ++inc) {
@@ -54,7 +54,7 @@ DECL_LAYER(CONV_3D, LAYER_ID) {
           const float *ppi = pi + y * INPUT_WIDTH + x;
           for (size_t wy = 0; wy < KERNEL_HEIGHT; wy++) {
             for (size_t wx = 0; wx < KERNEL_WIDTH; wx++) {
-              VecN mm_weight = SIMD_MM(broadcast_ss)(ppw++);
+              VecN mm_weight = SIMD_MM(set1_ps)(*ppw++);
               VecN mm_in = SIMD_MM(loadu_ps)(ppi + wy * INPUT_WIDTH + wx);
               mm_sum = SIMD_MM(add_ps)(mm_sum,
                                        SIMD_MM(mul_ps)(mm_weight, mm_in));

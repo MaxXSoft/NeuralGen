@@ -26,26 +26,30 @@
 // enable SIMD
 #define SIMD
 
-// length of the SIMD vector (4 or 8)
+// length of the SIMD vector (4/8/16)
 #ifndef SIMD_VEC_LEN
 #define SIMD_VEC_LEN 4
 #endif
-#if SIMD_VEC_LEN != 4 && SIMD_VEC_LEN != 8
-#error SIMD_VEC_LEN must be 4 or 8
+#if SIMD_VEC_LEN != 4 && SIMD_VEC_LEN != 8 && SIMD_VEC_LEN != 16
+#error SIMD_VEC_LEN must be 4/8/16
 #endif
 
 // type of SIMD vector
 #if SIMD_VEC_LEN == 4
 using VecN = __m128;
-#else  // SIMD_VEC_LEN == 8
+#elif SIMD_VEC_LEN == 8
 using VecN = __m256;
+#else  // SIMD_VEC_LEN == 16
+using VecN = __m512;
 #endif
 
 // SIMD intrinsic
 #if SIMD_VEC_LEN == 4
 #define SIMD_MM(name) _mm_##name
-#else  // SIMD_VEC_LEN == 8
+#elif SIMD_VEC_LEN == 8
 #define SIMD_MM(name) _mm256_##name
+#else  // SIMD_VEC_LEN == 16
+#define SIMD_MM(name) _mm512_##name
 #endif
 
 // align for SIMD vector boundary
